@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Fluid Particles</title>
+
+        <link href='https://fonts.googleapis.com/css?family=Asap:400,700' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="flip.css"/>
+    </head>
+
+    <body>
+        <script type="text/template" id="main">
+            <style>
+                .editing-ui {
+                    display: none;
+                }
+
+                .simulating-ui {
+                    display: none;
+                }
+            </style>
+
+            <canvas id="canvas" width="1920" height="1080"></canvas>
+            
+            <div id="ui">
+                <div id="start-button">Start</div>
+
+                <div id="preset-button" class="editing-ui">Random Preset</div>
+
+                <div class="slider-label editing-ui">Particle Density</div>
+                <div id="density-slider" class="slider editing-ui"></div>
+
+                <div id="particle-count" class="editing-ui"></div>
+
+                <div class="slider-label simulating-ui">Fluidity</div>
+                <div id="fluidity-slider" class="slider simulating-ui"></div>
+
+                <div class="slider-label simulating-ui">Speed</div>
+                <div id="speed-slider" class="slider simulating-ui"></div>
+            </div>
+
+
+            <div class="instructions editing-ui">
+                <span>Space + drag</span> to rotate camera <br/>
+                <span>Scroll</span> to zoom in and out <br/>
+                <br/>
+                <span>Draw on walls</span> to create new boxes <br/>
+                <span>Drag box faces</span> to resize <br/>
+                <span>Shift + drag box faces</span> to translate <br/>
+            </div>
+
+            <div class="instructions simulating-ui">
+                <span>Drag</span> to rotate camera<br/>
+                <span>Scroll</span> to zoom in and out <br/>
+                <span>Move mouse</span> to push particles
+            </div>
+
+            <div id="footer">
+               <a href="http://david.li">david.li</a> | <a href="https://youtu.be/DhNt_A3k4B4">Video</a> | <a href="https://github.com/dli/fluid">Code</a>  
+            </div>
+        </script>
+
+        <script type="text/template" id="no-support">
+            <div id="container">
+                <div id="error"></div>
+                <div id="video">You can still view a video.<br/>
+                    <iframe width="854" height="480" style="margin-top: 7px;" src="https://www.youtube.com/embed/DhNt_A3k4B4" frameborder="0" allowfullscreen></iframe> 
+                </div>
+                <div id="linkback"><a href="http://david.li">david.li</a></div>
+            </div>
+        </script>
+
+
+        <div id="placeholder"></div>
+
+
+        <script src="wrappedgl.js"></script>
+        <script src="utilities.js"></script>
+        <script src="camera.js"></script>
+        <script src="boxeditor.js"></script>
+        <script src="simulator.js"></script>
+        <script src="renderer.js"></script>
+        <script src="simulatorrenderer.js"></script>
+        <script src="slider.js"></script>
+        <script src="fluidparticles.js"></script>
+
+        <script>
+            function concatenateWords (list) {
+                if (list.length === 0) {
+                    return '';
+                } else if (list.length === 1) {
+                    return "'" + list[0] + "'";
+                } else {
+                    var result = '';
+                    for (var i = 0; i < list.length; ++i) {
+                        result += "'" + list[i] + "'";
+                        if (i < list.length - 1) {
+                            result += i < list.length - 2 ? ', ' : ' and '
+                        }
+                    }
+
+                    return result;
+                }
+            }
+
+            WrappedGL.checkWebGLSupportWithExtensions(['ANGLE_instanced_arrays', 'WEBGL_depth_texture', 'OES_texture_float', 'OES_texture_float_linear', 'OES_texture_half_float', 'OES_texture_half_float_linear'],
+                function () { //we have webgl
+                    document.getElementById('placeholder').outerHTML = document.getElementById('main').innerHTML;
+                    var fluidBox = new FluidParticles();
+                }, function (hasWebGL, unsupportedExtensions) {
+                    document.getElementById('placeholder').outerHTML = document.getElementById('no-support').innerHTML;
+                    if (!hasWebGL) { //webgl not supported
+                        document.getElementById('error').textContent = 'Unfortunately, your browser does not support WebGL';
+                    } else {
+                        document.getElementById('error').textContent = 'Unfortunately, your browser does not support the ' + concatenateWords(unsupportedExtensions) + " WebGL extension" + (unsupportedExtensions.length > 1 ? 's.' : '.');
+                    }
+                }
+            );
+        </script>
+    </body>
+
+</html>

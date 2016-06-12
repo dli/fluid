@@ -1,0 +1,189 @@
+* {
+    font-family: 'Asap', Helvetica, Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#start-button {
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+
+    margin-bottom: 15px;
+
+    width: 120px;
+    height: 40px;
+    line-height: 40px;
+
+    text-align: center;
+
+    pointer-events: auto;
+}
+
+.start-button-active {
+    cursor: default;
+    background: rgb(70, 190, 60);
+}
+
+.start-button-active:hover {
+    background: rgb(60, 180, 50);
+}
+
+.start-button-active:active {
+    background: rgb(50, 170, 40);
+}
+
+.start-button-inactive {
+    background: #999999;
+    cursor: default;
+}
+
+#preset-button {
+    margin-bottom: 10px;
+
+    background: rgba(80, 160, 230, 1.0);
+
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+
+    text-align: center;
+
+    cursor: default;
+
+    pointer-events: auto;
+}
+
+#preset-button:hover {
+    background: rgba(70, 150, 220, 1.0);
+}
+
+#preset-button:active {
+    background: rgba(60, 140, 210, 1.0);
+}
+
+#ui {
+    position: absolute;
+
+    pointer-events: none;
+
+    top: 30px;
+    left: 30px;
+}
+
+#particle-count {
+    color: #777777;
+
+    font-size: 12px;
+
+    margin-top: 4px;
+}
+
+.slider-label {
+    color: #555555;
+    font-size: 12px;
+    font-weight: bold;
+
+    margin-top: 5px;
+}
+
+.slider {
+    margin-top: 4px;
+
+    width: 200px;
+    height: 22px;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+
+    background: rgba(0, 0, 0, 0.1);
+
+    pointer-events: auto;
+}
+
+.slider:hover {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.slider div {
+    background: #666666;
+}
+
+.slider:hover div {
+    background: #555555;
+}
+
+.instructions {
+    position: absolute;
+
+    bottom: 30px;
+    left: 30px;
+
+    font-size: 12px;
+    line-height: 16px;
+
+    color: #555555;
+
+    margin-top: 20px;
+}
+
+.instructions span {
+    font-weight: bold;
+
+    color: #444444;
+}
+
+#footer {
+    font-size: 12px;
+
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+
+    color: #555555;
+}
+
+#footer a {
+    text-decoration: underline;
+    color: #555555;
+}
+
+#container {
+    color: #333333;
+    font-size: 14px;
+
+    margin-top: 40px;
+    margin-left: 40px;
+}
+
+#video {
+    color: #333333;
+    font-size: 14px;
+
+    margin-top: 20px;
+}
+
+#linkback {
+    color: #333333;
+
+    margin-top: 20px;
+}
+
+#linkback a {
+    color: #333333;
+}
