@@ -501,7 +501,7 @@ var Simulator = (function () {
             wgl.createClearState().bindFramebuffer(this.simulationFramebuffer),
             wgl.COLOR_BUFFER_BIT);
         
-        var PRESSURE_JACOBI_ITERATIONS = 40;
+        var PRESSURE_JACOBI_ITERATIONS = 50;
         for (var i = 0; i < PRESSURE_JACOBI_ITERATIONS; ++i) {
             wgl.framebufferTexture2D(this.simulationFramebuffer, wgl.FRAMEBUFFER, wgl.COLOR_ATTACHMENT0, wgl.TEXTURE_2D, this.tempSimulationTexture, 0);
             jacobiDrawState.uniformTexture('u_pressureTexture', 0, wgl.TEXTURE_2D, this.pressureTexture);
