@@ -1,138 +1,134 @@
-'use strict'
+import Utilities from './utilities.js'
 
-var Camera = (function () {
-    var SENSITIVITY = 0.005;
+var SENSITIVITY = 0.005
 
-    var MIN_DISTANCE = 25.0;
-    var MAX_DISTANCE = 60.0;
+var MIN_DISTANCE = 25.0
+var MAX_DISTANCE = 60.0
 
-    function Camera (element, orbitPoint) {
-        this.element = element;
-        this.distance = 40.0;
-        this.orbitPoint = orbitPoint;
+export default class Camera {
+  constructor (element, orbitPoint) {
+    this.element = element
+    this.distance = 40.0
+    this.orbitPoint = orbitPoint
 
-        this.azimuth = 0.0,
-        this.elevation = 0.25
+    this.azimuth = 0.0
+    this.elevation = 0.25
 
-        this.minElevation = -Math.PI / 4;
-        this.maxElevation = Math.PI / 4;
+    this.minElevation = -Math.PI / 4
+    this.maxElevation = Math.PI / 4
 
-        this.currentMouseX = 0,
-        this.currentMouseY = 0;
+    this.currentMouseX = 0
+    this.currentMouseY = 0
 
-        this.lastMouseX = 0,
-        this.lastMouseY = 0;
+    this.lastMouseX = 0
+    this.lastMouseY = 0
 
-        this.mouseDown = false;
+    this.mouseDown = false
 
-        this.viewMatrix = new Float32Array(16);
+    this.viewMatrix = new Float32Array(16)
 
+    this.recomputeViewMatrix()
 
-        this.recomputeViewMatrix();
+    element.addEventListener('wheel', function (event) {
+      var scrollDelta = event.deltaY
+      this.distance += ((scrollDelta > 0) ? 1 : -1) * 2.0
 
+      if (this.distance < MIN_DISTANCE) { this.distance = MIN_DISTANCE }
+      if (this.distance > MAX_DISTANCE) { this.distance = MAX_DISTANCE }
 
-        element.addEventListener('wheel', (function (event) {
-            var scrollDelta = event.deltaY;
-            this.distance += ((scrollDelta > 0) ? 1 : -1) * 2.0;
+      this.recomputeViewMatrix()
+    }.bind(this))
+  }
 
-            if (this.distance < MIN_DISTANCE) this.distance = MIN_DISTANCE;
-            if (this.distance > MAX_DISTANCE) this.distance = MAX_DISTANCE;
+  recomputeViewMatrix () {
+    var xRotationMatrix = new Float32Array(16)
+    var yRotationMatrix = new Float32Array(16)
+    var distanceTranslationMatrix = Utilities.makeIdentityMatrix(new Float32Array(16))
+    var orbitTranslationMatrix = Utilities.makeIdentityMatrix(new Float32Array(16))
 
-            this.recomputeViewMatrix();
-        }).bind(this));
-    };
+    Utilities.makeIdentityMatrix(this.viewMatrix)
 
-    Camera.prototype.recomputeViewMatrix = function () {
-        var xRotationMatrix = new Float32Array(16),
-            yRotationMatrix = new Float32Array(16),
-            distanceTranslationMatrix = Utilities.makeIdentityMatrix(new Float32Array(16)),
-            orbitTranslationMatrix = Utilities.makeIdentityMatrix(new Float32Array(16));
+    Utilities.makeXRotationMatrix(xRotationMatrix, this.elevation)
+    Utilities.makeYRotationMatrix(yRotationMatrix, this.azimuth)
+    distanceTranslationMatrix[14] = -this.distance
+    orbitTranslationMatrix[12] = -this.orbitPoint[0]
+    orbitTranslationMatrix[13] = -this.orbitPoint[1]
+    orbitTranslationMatrix[14] = -this.orbitPoint[2]
 
-        Utilities.makeIdentityMatrix(this.viewMatrix);
+    Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, orbitTranslationMatrix)
+    Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, yRotationMatrix)
+    Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, xRotationMatrix)
+    Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, distanceTranslationMatrix)
+  }
 
-        Utilities.makeXRotationMatrix(xRotationMatrix, this.elevation);
-        Utilities.makeYRotationMatrix(yRotationMatrix, this.azimuth);
-        distanceTranslationMatrix[14] = -this.distance;
-        orbitTranslationMatrix[12] = -this.orbitPoint[0];
-        orbitTranslationMatrix[13] = -this.orbitPoint[1];
-        orbitTranslationMatrix[14] = -this.orbitPoint[2];
+  getPosition () {
+    var position = [
+      this.distance * Math.sin(Math.PI / 2 - this.elevation) * Math.sin(-this.azimuth) + this.orbitPoint[0],
+      this.distance * Math.cos(Math.PI / 2 - this.elevation) + this.orbitPoint[1],
+      this.distance * Math.sin(Math.PI / 2 - this.elevation) * Math.cos(-this.azimuth) + this.orbitPoint[2]
+    ]
 
-        Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, orbitTranslationMatrix);
-        Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, yRotationMatrix);
-        Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, xRotationMatrix);
-        Utilities.premultiplyMatrix(this.viewMatrix, this.viewMatrix, distanceTranslationMatrix);
-    };
+    return position
+  }
 
-    Camera.prototype.getPosition = function () {
-        var position = [
-            this.distance * Math.sin(Math.PI / 2 - this.elevation) * Math.sin(-this.azimuth) + this.orbitPoint[0],
-            this.distance * Math.cos(Math.PI / 2 - this.elevation) + this.orbitPoint[1],
-            this.distance * Math.sin(Math.PI / 2 - this.elevation) * Math.cos(-this.azimuth) + this.orbitPoint[2]
-        ];
+  isMouseDown () {
+    return this.mouseDown
+  }
 
-        return position;
-    };
+  getViewMatrix () {
+    return this.viewMatrix
+  }
 
-    Camera.prototype.isMouseDown = function () {
-        return this.mouseDown;
-    };
+  setBounds (minElevation, maxElevation) {
+    this.minElevation = minElevation
+    this.maxElevation = maxElevation
 
-    Camera.prototype.getViewMatrix = function () {
-        return this.viewMatrix;
-    };
+    if (this.elevation > this.maxElevation) { this.elevation = this.maxElevation }
+    if (this.elevation < this.minElevation) { this.elevation = this.minElevation }
 
-    Camera.prototype.setBounds = function (minElevation, maxElevation) {
-        this.minElevation = minElevation;
-        this.maxElevation = maxElevation;
+    this.recomputeViewMatrix()
+  }
 
-        if (this.elevation > this.maxElevation) this.elevation = this.maxElevation;
-        if (this.elevation < this.minElevation) this.elevation = this.minElevation;
+  onMouseDown (event) {
+    event.preventDefault()
 
-        this.recomputeViewMatrix();
-    };
+    var x = Utilities.getMousePosition(event, this.element).x
+    var y = Utilities.getMousePosition(event, this.element).y
 
-    Camera.prototype.onMouseDown = function (event) {
-        event.preventDefault();
+    this.mouseDown = true
+    this.lastMouseX = x
+    this.lastMouseY = y
+  }
 
-        var x = Utilities.getMousePosition(event, this.element).x;
-        var y = Utilities.getMousePosition(event, this.element).y;
+  onMouseUp (event) {
+    event.preventDefault()
 
-        this.mouseDown = true;
-        this.lastMouseX = x;
-        this.lastMouseY = y;
-    };
+    this.mouseDown = false
+  }
 
-    Camera.prototype.onMouseUp = function (event) {
-        event.preventDefault();
+  onMouseMove (event) {
+    event.preventDefault()
 
-        this.mouseDown = false;
-    };
+    var x = Utilities.getMousePosition(event, this.element).x
+    var y = Utilities.getMousePosition(event, this.element).y
 
-    Camera.prototype.onMouseMove = function (event) {
-        event.preventDefault();
+    if (this.mouseDown) {
+      this.currentMouseX = x
+      this.currentMouseY = y
 
-        var x = Utilities.getMousePosition(event, this.element).x;
-        var y = Utilities.getMousePosition(event, this.element).y;
+      var deltaAzimuth = (this.currentMouseX - this.lastMouseX) * SENSITIVITY
+      var deltaElevation = (this.currentMouseY - this.lastMouseY) * SENSITIVITY
 
-        if (this.mouseDown) {
-            this.currentMouseX = x;
-            this.currentMouseY = y;
+      this.azimuth += deltaAzimuth
+      this.elevation += deltaElevation
 
-            var deltaAzimuth = (this.currentMouseX - this.lastMouseX) * SENSITIVITY;
-            var deltaElevation = (this.currentMouseY - this.lastMouseY) * SENSITIVITY;
+      if (this.elevation > this.maxElevation) { this.elevation = this.maxElevation }
+      if (this.elevation < this.minElevation) { this.elevation = this.minElevation }
 
-            this.azimuth += deltaAzimuth;
-            this.elevation += deltaElevation;
+      this.recomputeViewMatrix()
 
-            if (this.elevation > this.maxElevation) this.elevation = this.maxElevation;
-            if (this.elevation < this.minElevation) this.elevation = this.minElevation;
-
-            this.recomputeViewMatrix();
-
-            this.lastMouseX = this.currentMouseX;
-            this.lastMouseY = this.currentMouseY;
-        }
-    };
-
-    return Camera;
-}());
+      this.lastMouseX = this.currentMouseX
+      this.lastMouseY = this.currentMouseY
+    }
+  }
+}
